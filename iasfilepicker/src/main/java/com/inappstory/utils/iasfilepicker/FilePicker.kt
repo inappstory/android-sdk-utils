@@ -8,6 +8,10 @@ import com.inappstory.sdk.modulesconnector.utils.filepicker.OnFilesChooseCallbac
 import com.inappstory.sdk.network.JsonParser
 import com.inappstory.sdk.stories.api.models.Session
 import com.inappstory.utils.iasfilepicker.utils.BackPressedFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.ArrayList
 
 class FilePicker : IFilePicker {
@@ -51,22 +55,26 @@ class FilePicker : IFilePicker {
             )
             return
         }
-        FilePickerMainFragment().apply {
-            arguments = args
-            try {
-                val t = fragmentManager.beginTransaction()
-                    .add(containerId, this, "FilePicker")
-                t.addToBackStack(null)
-                t.commitAllowingStateLoss()
-            } catch (e: IllegalStateException) {
-                callback.onError(
-                    FilePickerVM.filePickerSettings?.cb,
-                    FilePickerVM.filePickerSettings?.id,
-                    e.message.orEmpty()
-                )
-                FilePickerVM.filesChooseCallback = null
+        val coroutine = CoroutineScope(Dispatchers.Main)
+        coroutine.launch(Dispatchers.Main) {
+            FilePickerMainFragment().apply {
+                arguments = args
+                try {
+                    val t = fragmentManager.beginTransaction()
+                        .add(containerId, this, "FilePicker")
+                    t.addToBackStack(null)
+                    t.commitAllowingStateLoss()
+                } catch (e: IllegalStateException) {
+                    callback.onError(
+                        FilePickerVM.filePickerSettings?.cb,
+                        FilePickerVM.filePickerSettings?.id,
+                        e.message.orEmpty()
+                    )
+                    FilePickerVM.filesChooseCallback = null
+                }
             }
         }
+
     }
 
     override fun close() {

@@ -8,6 +8,6 @@ dependencyResolutionManagement {
 }
 rootProject.name = "IASUtils"
 
-include ':app'
 include ':iasfilepicker'
 include ':iaslottie'
+include ':examples'
