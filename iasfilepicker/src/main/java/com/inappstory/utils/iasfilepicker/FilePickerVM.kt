@@ -6,6 +6,7 @@ import com.inappstory.sdk.modulesconnector.utils.filepicker.OnFilesChooseCallbac
 object FilePickerVM {
     var filesChooseCallback: OnFilesChooseCallback? = null
     var parentFragmentManager: FragmentManager? = null
+    var containerId: Int? = null
     var filePickerSettings: FilePickerSettings? = null
 
     fun close() {

@@ -26,7 +26,8 @@ class FilePicker : IFilePicker {
 
     override fun onBackPressed(): Boolean {
         val fm = FilePickerVM.parentFragmentManager ?: return false
-        val parentFragment = fm.findFragmentById(R.id.fragments_layout) ?: return false
+        val containerId = FilePickerVM.containerId ?: R.id.fragments_layout
+        val parentFragment = fm.findFragmentById(containerId) ?: return false
         val childFragment =
             parentFragment.childFragmentManager.findFragmentById(R.id.fragments_layout)
         if (childFragment !is BackPressedFragment || !childFragment.onBackPressed()) {
@@ -46,6 +47,7 @@ class FilePicker : IFilePicker {
     ) {
         val args = convertSettings()
         FilePickerVM.parentFragmentManager = fragmentManager;
+        FilePickerVM.containerId = containerId;
         FilePickerVM.filesChooseCallback = callback
         if (args == null) {
             callback.onError(

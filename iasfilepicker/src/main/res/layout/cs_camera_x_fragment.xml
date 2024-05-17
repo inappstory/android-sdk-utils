@@ -60,6 +60,7 @@
             android:layout_centerVertical="true"
             android:src="@drawable/cs_camera_flip"
             android:tint="@color/black"
+            app:tint="@color/black"
             app:backgroundTint="@color/white"
             app:maxImageSize="36dp" />
     </RelativeLayout>
