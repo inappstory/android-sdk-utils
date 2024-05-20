@@ -138,7 +138,8 @@ class FilePreviewsCache {
         path: String,
         imageView: ImageView,
         noCache: Boolean,
-        unavailable: Boolean
+        unavailable: Boolean,
+        needToRotate: Boolean = false
     ) {
         var bmp: Bitmap? = null
         if (!noCache) bmp = getBitmap(path)
@@ -146,7 +147,8 @@ class FilePreviewsCache {
             if (noCache) {
                 val file = File(path)
                 val loaded =
-                    if (unavailable) toGrayscale(decodeFile(file)) else decodeFile(file)
+                    if (unavailable) toGrayscale(decodeFile(file, needToRotate))
+                    else decodeFile(file, needToRotate)
                 withContext(Dispatchers.Main) {
                     imageView.setImageBitmap(
                         loaded
@@ -231,7 +233,7 @@ class FilePreviewsCache {
     private fun checkAndLoadTask() {
         getMaxPriorityTaskKey()?.let { key ->
             coroutineScope.launch {
-                val loaded = decodeFile(File(key))
+                val loaded = decodeFile(File(key), true)
                 val task = tasks[key]
                 if (loaded == null) return@launch
                 synchronized(memCacheLock) {
@@ -260,7 +262,7 @@ class FilePreviewsCache {
         }
     }
 
-    private fun decodeFile(f: File): Bitmap? {
+    private fun decodeFile(f: File, needToRotate: Boolean): Bitmap? {
         try {
             val o = BitmapFactory.Options()
             o.inJustDecodeBounds = true
@@ -277,7 +279,10 @@ class FilePreviewsCache {
             o.inJustDecodeBounds = false
             o.inSampleSize = scale
             val bitmap = BitmapFactory.decodeFile(f.absolutePath, o)
-            return rotateImageIfRequired(bitmap, f.absolutePath)
+            return if (needToRotate)
+                rotateImageIfRequired(bitmap, f.absolutePath)
+            else
+                bitmap
             //
         } catch (e: Exception) {
             e.printStackTrace()
