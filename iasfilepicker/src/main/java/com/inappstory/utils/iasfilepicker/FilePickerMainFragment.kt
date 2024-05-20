@@ -25,23 +25,36 @@ class FilePickerMainFragment : Fragment() {
         return inflater.inflate(R.layout.cs_file_choose_activity, container, false)
     }
 
+    fun requestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        val fragment = childFragmentManager.findFragmentByTag("FILE_CHOOSE")
+        if (fragment is FilePickerFragment) {
+            fragment.requestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState == null)
             openFilePickerScreen(requireArguments())
     }
 
+
+
     fun openFileCameraScreen(bundle: Bundle) {
         CameraFlowFragment().apply {
             arguments = bundle
-            openFragment(this, "UGC_CAMERA_FLOW", add = true)
+            openFragment(this, "CAMERA_FLOW", add = true)
         }
     }
 
     private fun openFilePickerScreen(bundle: Bundle) {
         FilePickerFragment().apply {
             arguments = bundle
-            openFragment(this, "UGC_FILE_CHOOSE")
+            openFragment(this, "FILE_CHOOSE")
         }
     }
 

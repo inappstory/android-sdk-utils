@@ -6,12 +6,11 @@ import androidx.fragment.app.FragmentManager
 import com.inappstory.sdk.modulesconnector.utils.filepicker.IFilePicker
 import com.inappstory.sdk.modulesconnector.utils.filepicker.OnFilesChooseCallback
 import com.inappstory.sdk.network.JsonParser
-import com.inappstory.sdk.stories.api.models.Session
+import com.inappstory.utils.iasfilepicker.file.FilePickerFragment
 import com.inappstory.utils.iasfilepicker.utils.BackPressedFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.ArrayList
 
 class FilePicker : IFilePicker {
@@ -37,6 +36,23 @@ class FilePicker : IFilePicker {
                 close()
         }
         return true
+    }
+
+    override fun permissionResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        val fm = FilePickerVM.parentFragmentManager ?: return
+        val containerId = FilePickerVM.containerId ?: R.id.fragments_layout
+        val filePickerFragment = fm.findFragmentById(containerId) ?: return
+        if (filePickerFragment is FilePickerMainFragment) {
+            filePickerFragment.requestPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+            )
+        }
     }
 
     override fun show(
