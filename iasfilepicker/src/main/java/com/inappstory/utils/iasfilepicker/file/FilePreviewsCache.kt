@@ -217,7 +217,7 @@ class FilePreviewsCache {
                     tasks[minTaskKey]
                 if (cur != null) cur.started = true
             }
-            return minTaskKey!!
+            return minTaskKey
         }
     }
 
