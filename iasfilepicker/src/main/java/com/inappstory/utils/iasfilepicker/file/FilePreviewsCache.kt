@@ -16,6 +16,7 @@ import android.util.Size
 import android.widget.ImageView
 import androidx.exifinterface.media.ExifInterface
 import com.inappstory.sdk.stories.utils.Sizes
+import com.inappstory.utils.iasfilepicker.FilePickerVM
 import com.inappstory.utils.iasfilepicker.utils.BitmapCache
 import com.inappstory.utils.iasfilepicker.utils.QueuedTask
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +27,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+
 
 class FilePreviewsCache {
     private var memoryCache: BitmapCache? = null
@@ -183,11 +185,14 @@ class FilePreviewsCache {
 
     @Throws(IOException::class)
     private fun rotateImageIfRequired(img: Bitmap, filePath: String): Bitmap {
-        return when (getExifInformation(filePath)) {
+        return when(getExifInformation(filePath)) {
             ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> flipImage(img)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> flipImage(rotateImage(img, -180))
             ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90)
             ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180)
             ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270)
+            ExifInterface.ORIENTATION_TRANSPOSE -> flipImage(rotateImage(img, -270))
+            ExifInterface.ORIENTATION_TRANSVERSE -> flipImage(rotateImage(img, -90))
             else -> img
         }
     }
@@ -279,10 +284,7 @@ class FilePreviewsCache {
             o.inJustDecodeBounds = false
             o.inSampleSize = scale
             val bitmap = BitmapFactory.decodeFile(f.absolutePath, o)
-            return if (needToRotate)
-                rotateImageIfRequired(bitmap, f.absolutePath)
-            else
-                bitmap
+            return rotateImageIfRequired(bitmap, f.absolutePath)
             //
         } catch (e: Exception) {
             e.printStackTrace()
@@ -302,6 +304,17 @@ class FilePreviewsCache {
         private fun flipImage(img: Bitmap): Bitmap {
             val matrix = Matrix()
             matrix.postScale(-1.0f, 1.0f)
+            val rotatedImg = Bitmap.createBitmap(
+                img, 0, 0,
+                img.width, img.height, matrix, true
+            )
+            img.recycle()
+            return rotatedImg
+        }
+
+        private fun flipImageVertical(img: Bitmap): Bitmap {
+            val matrix = Matrix()
+            matrix.postScale(1.0f, -1.0f)
             val rotatedImg = Bitmap.createBitmap(
                 img, 0, 0,
                 img.width, img.height, matrix, true

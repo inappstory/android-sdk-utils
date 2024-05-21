@@ -9,7 +9,7 @@ class FilePickerCore : ModuleInitializer {
         InAppStoryManager.useInstance(object : UseManagerInstanceCallback() {
             @Throws(Exception::class)
             override fun use(manager: InAppStoryManager) {
-                manager.setFilePicker(FilePicker())
+                manager.filePicker = FilePicker()
             }
         })
     }

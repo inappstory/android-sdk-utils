@@ -1,5 +1,7 @@
 package com.inappstory.utils.iaslottie
 
+import android.util.Pair
+import com.inappstory.sdk.BuildConfig
 import com.inappstory.sdk.InAppStoryManager
 import com.inappstory.sdk.UseManagerInstanceCallback
 import com.inappstory.sdk.modulesconnector.utils.ModuleInitializer
@@ -14,5 +16,9 @@ class LottieViewCore : ModuleInitializer {
                     ILottieViewGenerator { context -> LottiePlayerView(context) }
             }
         })
+    }
+
+    fun getLibraryVersion(): Pair<String, Int> {
+        return Pair(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
     }
 }

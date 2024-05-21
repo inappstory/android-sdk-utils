@@ -112,6 +112,8 @@ class FilePicker : IFilePicker {
         val config = settings?.config ?: FilePickerConfig()
         val messages = config.messages ?: hashMapOf()
         return Bundle().apply {
+            putBoolean("hasVideo", hasVideo)
+            putBoolean("hasPhoto", hasPhoto)
             putStringArrayList(
                 "acceptTypes",
                 settings?.accept?.split(",") as ArrayList<String>?

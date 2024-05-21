@@ -69,11 +69,13 @@ internal class FilePickerFragment : BackPressedFragment() {
         }
     }
 
-    private fun checkCameraPermissions() {
+    private fun checkCameraPermissions(audioCheck: Boolean = false) {
         activity?.apply {
             var allGranted = true;
             val localPerms =
-                arrayListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+                arrayListOf(Manifest.permission.CAMERA)
+            if (audioCheck)
+                localPerms.add(Manifest.permission.RECORD_AUDIO)
             localPerms.forEach {
                 if (ContextCompat.checkSelfPermission(
                         this,
@@ -238,7 +240,7 @@ internal class FilePickerFragment : BackPressedFragment() {
         val fileLimitVideoSize = messages["title_video_max_size_limit"] ?: "File is too large"
         val fileLimitVideoDuration =
             messages["title_video_max_duration_limit"] ?: "File is too large"
-
+        val hasVideo = arguments?.getBoolean("hasVideo") ?: false
         val translations = mapOf(
             "galleryFileLimitText" to galleryFileLimitText,
             "galleryAccessText" to galleryAccessText,
@@ -265,7 +267,7 @@ internal class FilePickerFragment : BackPressedFragment() {
             },
             cameraCallback = object : OpenCameraClickCallback {
                 override fun open() {
-                    checkCameraPermissions()
+                    checkCameraPermissions(hasVideo)
                     //openCameraScreen(isVideo)
                 }
             },

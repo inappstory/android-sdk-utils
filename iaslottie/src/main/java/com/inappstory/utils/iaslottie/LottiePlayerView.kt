@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.Pair
 import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.LottieDrawable
 import com.inappstory.sdk.modulesconnector.utils.lottie.ILottieView
 import java.io.ByteArrayInputStream
@@ -23,6 +24,8 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
     )
 
     override fun setSource(source: Any) {
+        this.scaleType = ScaleType.FIT_CENTER
+        setMinAndMaxFrame(0, 99)
         if (source is Pair<*, *>) {
             if (source.first is String) {
                 when (source.second) {
@@ -36,21 +39,37 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                     }
 
                     is File -> {
-                        try {
-                            setAnimation(
-                                FileInputStream(source.second as File),
+                        if (
+                            arrayOf("lottie", "zip").contains(
+                                (source.second as File).extension
+                            )
+                        ) {
+                            val stream = FileInputStream((source.second as File))
+                            val result = LottieCompositionFactory.fromZipStreamSync(
+                                ZipInputStream(stream),
                                 source.first as String
                             )
-                        } catch (e: FileNotFoundException) {
+                            val composition = result.value ?: return
+                            setComposition(composition)
+                        } else {
+                            try {
+                                setAnimation(
+                                    FileInputStream(source.second as File),
+                                    source.first as String
+                                )
+                            } catch (e: FileNotFoundException) {
+                            }
                         }
                     }
 
                     is ZipInputStream -> {
                         //  this.setImageAssetsFolder();
-                        setAnimation(
+                        val result = LottieCompositionFactory.fromZipStreamSync(
                             source.second as ZipInputStream,
                             source.first as String
                         )
+                        val composition = result.value ?: return
+                        setComposition(composition)
                     }
                 }
                 if (source.second is InputStream) {
@@ -61,7 +80,6 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                 }
             }
         }
-        this.scaleType = ScaleType.CENTER_CROP
     }
 
     override fun play() {
