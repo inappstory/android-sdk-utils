@@ -26,6 +26,7 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
     override fun setSource(source: Any) {
         this.scaleType = ScaleType.FIT_CENTER
         setMinAndMaxFrame(0, 99)
+
         if (source is Pair<*, *>) {
             if (source.first is String) {
                 when (source.second) {

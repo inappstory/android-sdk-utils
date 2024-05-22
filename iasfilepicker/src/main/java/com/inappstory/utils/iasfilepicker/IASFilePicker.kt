@@ -1,7 +1,6 @@
 package com.inappstory.utils.iasfilepicker
 
 import android.util.Pair
-import com.inappstory.sdk.BuildConfig
 
 object IASFilePicker {
     fun getLibraryVersion(): Pair<String, Int> {
