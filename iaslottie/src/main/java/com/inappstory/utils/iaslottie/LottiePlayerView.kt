@@ -1,5 +1,7 @@
 package com.inappstory.utils.iaslottie
 
+import android.animation.Animator
+import android.animation.Animator.AnimatorListener
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Pair
@@ -25,7 +27,6 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
 
     override fun setSource(source: Any) {
         this.scaleType = ScaleType.FIT_CENTER
-        setMinAndMaxFrame(0, 99)
 
         if (source is Pair<*, *>) {
             if (source.first is String) {
@@ -46,11 +47,13 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                             )
                         ) {
                             val stream = FileInputStream((source.second as File))
+                            val manifest = LottieUtils().getManifestJson(source.second as File)
                             val result = LottieCompositionFactory.fromZipStreamSync(
                                 ZipInputStream(stream),
                                 source.first as String
                             )
                             val composition = result.value ?: return
+                            totalFrame = composition.durationFrames
                             setComposition(composition)
                         } else {
                             try {
@@ -83,9 +86,10 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
         }
     }
 
+
+
     override fun play() {
         playAnimation()
-        addAnimatorUpdateListener { }
     }
 
     override fun stop() {
@@ -104,8 +108,16 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
         playAnimation()
     }
 
+    override fun isLooped(): Boolean {
+        return false
+    }
+
+    private var maxFrame: Float = 99f
+    private var totalFrame: Float = 99f
+
     override fun setAnimProgress(progress: Float) {
-        super.setProgress(progress)
+        val coefficient = maxFrame / totalFrame
+        super.setProgress(progress * coefficient)
     }
 
     override fun setLoop(isLooped: Boolean) {
