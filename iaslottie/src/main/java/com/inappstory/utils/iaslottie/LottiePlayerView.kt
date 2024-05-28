@@ -26,6 +26,8 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
         defStyleAttr
     )
 
+    private var animationIsLooped = false
+
     override fun setSource(source: Any) {
         this.scaleType = ScaleType.FIT_CENTER
 
@@ -53,12 +55,11 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                                 JsonParser.fromJson(
                                     manifest, LottieManifest::class.java
                                 )
-                            var looped = false
                             manifestObject?.let {manifestObj->
 
                                 manifestObj.lottieAnimations?.forEach {
                                     if (it.loop == true) {
-                                        looped = true
+                                        animationIsLooped = true
                                     }
                                 }
 
@@ -70,7 +71,6 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                             val composition = result.value ?: return
                             totalFrame = composition.durationFrames
                             setComposition(composition)
-                            setLoop(looped)
                         } else {
                             try {
                                 setAnimation(
@@ -100,6 +100,7 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                 }
             }
         }
+        setLoop(animationIsLooped)
     }
 
 
@@ -131,6 +132,7 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
     private var totalFrame: Float = 99f
 
     override fun setAnimProgress(progress: Float) {
+        if (animationIsLooped) return
         val coefficient = maxFrame / totalFrame
         super.setProgress(progress * coefficient)
     }
