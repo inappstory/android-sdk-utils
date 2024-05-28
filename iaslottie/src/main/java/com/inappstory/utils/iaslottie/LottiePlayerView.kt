@@ -9,6 +9,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.LottieDrawable
 import com.inappstory.sdk.modulesconnector.utils.lottie.ILottieView
+import com.inappstory.sdk.network.JsonParser
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -48,6 +49,20 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                         ) {
                             val stream = FileInputStream((source.second as File))
                             val manifest = LottieUtils().getManifestJson(source.second as File)
+                            val manifestObject: LottieManifest? =
+                                JsonParser.fromJson(
+                                    manifest, LottieManifest::class.java
+                                )
+                            var looped = false
+                            manifestObject?.let {manifestObj->
+
+                                manifestObj.lottieAnimations?.forEach {
+                                    if (it.loop == true) {
+                                        looped = true
+                                    }
+                                }
+
+                            }
                             val result = LottieCompositionFactory.fromZipStreamSync(
                                 ZipInputStream(stream),
                                 source.first as String
@@ -55,6 +70,7 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                             val composition = result.value ?: return
                             totalFrame = composition.durationFrames
                             setComposition(composition)
+                            setLoop(looped)
                         } else {
                             try {
                                 setAnimation(
@@ -85,7 +101,6 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
             }
         }
     }
-
 
 
     override fun play() {

@@ -13,7 +13,7 @@ class LottieUtils {
             if (file.exists()) {
                 val stream = FileInputStream(file)
                 val zipStream = ZipInputStream(stream)
-                val entry: ZipEntry? = zipStream.nextEntry
+                var entry: ZipEntry? = zipStream.nextEntry
                 while (entry != null) {
                     if (entry.name.equals("manifest.json", ignoreCase = true)) {
                         var count: Int
@@ -24,6 +24,7 @@ class LottieUtils {
                         }
                         break
                     }
+                    entry = zipStream.nextEntry
                 }
             } else {
                 return null
