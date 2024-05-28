@@ -125,7 +125,7 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
     }
 
     override fun isLooped(): Boolean {
-        return false
+        return animationIsLooped
     }
 
     private var maxFrame: Float = 99f
