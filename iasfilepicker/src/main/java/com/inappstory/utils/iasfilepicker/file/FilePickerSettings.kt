@@ -1,4 +1,4 @@
-package com.inappstory.utils.iasfilepicker
+package com.inappstory.utils.iasfilepicker.file
 
 class FilePickerSettings {
     var id: String? = null

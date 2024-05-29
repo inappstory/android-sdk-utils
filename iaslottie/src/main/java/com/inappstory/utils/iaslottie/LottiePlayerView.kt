@@ -1,15 +1,13 @@
 package com.inappstory.utils.iaslottie
 
-import android.animation.Animator
-import android.animation.Animator.AnimatorListener
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Pair
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.LottieDrawable
-import com.inappstory.sdk.modulesconnector.utils.lottie.ILottieView
-import com.inappstory.sdk.network.JsonParser
+import com.inappstory.iasutilsconnector.UtilModulesHolder
+import com.inappstory.iasutilsconnector.lottie.ILottieView
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -28,9 +26,9 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
 
     private var animationIsLooped = false
 
-    override fun setSource(source: Any) {
+    override fun setSource(source: Any?) {
         this.scaleType = ScaleType.FIT_CENTER
-
+        if (source == null) return
         if (source is Pair<*, *>) {
             if (source.first is String) {
                 when (source.second) {
@@ -52,12 +50,12 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
                             val stream = FileInputStream((source.second as File))
                             val manifest = LottieUtils().getManifestJson(source.second as File)
                             val manifestObject: LottieManifest? =
-                                JsonParser.fromJson(
+                                UtilModulesHolder.jsonParser.fromJson(
                                     manifest, LottieManifest::class.java
                                 )
                             manifestObject?.let {manifestObj->
 
-                                manifestObj.lottieAnimations?.forEach {
+                                manifestObj.animations?.forEach {
                                     if (it.loop == true) {
                                         animationIsLooped = true
                                     }
@@ -112,6 +110,9 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
         pauseAnimation()
     }
 
+    override val isLooped: Boolean
+        get() = animationIsLooped
+
     override fun pause() {
         pauseAnimation()
     }
@@ -122,10 +123,6 @@ class LottiePlayerView : LottieAnimationView, ILottieView {
 
     override fun restart() {
         playAnimation()
-    }
-
-    override fun isLooped(): Boolean {
-        return animationIsLooped
     }
 
     private var maxFrame: Float = 99f

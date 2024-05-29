@@ -3,10 +3,11 @@ package com.inappstory.utils.iasfilepicker
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.FragmentManager
-import com.inappstory.sdk.modulesconnector.utils.filepicker.IFilePicker
-import com.inappstory.sdk.modulesconnector.utils.filepicker.OnFilesChooseCallback
-import com.inappstory.sdk.network.JsonParser
-import com.inappstory.utils.iasfilepicker.file.FilePickerFragment
+import com.inappstory.iasutilsconnector.UtilModulesHolder
+import com.inappstory.iasutilsconnector.filepicker.IFilePicker
+import com.inappstory.iasutilsconnector.filepicker.OnFilesChooseCallback
+import com.inappstory.utils.iasfilepicker.file.FilePickerConfig
+import com.inappstory.utils.iasfilepicker.file.FilePickerSettings
 import com.inappstory.utils.iasfilepicker.utils.BackPressedFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,13 +16,6 @@ import java.util.ArrayList
 
 class FilePicker : IFilePicker {
 
-    override fun setPickerSettings(settings: String?) {
-        FilePickerVM.filePickerSettings =
-            JsonParser.fromJson(
-                settings,
-                FilePickerSettings::class.java
-            )
-    }
 
     override fun onBackPressed(): Boolean {
         val fm = FilePickerVM.parentFragmentManager ?: return false
@@ -40,7 +34,7 @@ class FilePicker : IFilePicker {
 
     override fun permissionResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<String?>,
         grantResults: IntArray
     ) {
         val fm = FilePickerVM.parentFragmentManager ?: return
@@ -55,18 +49,27 @@ class FilePicker : IFilePicker {
         }
     }
 
+    override fun setPickerSettings(settings: String?) {
+        val filePickerSettings: FilePickerSettings? =
+            UtilModulesHolder.jsonParser.fromJson(
+                settings, FilePickerSettings::class.java
+            )
+        FilePickerVM.filePickerSettings = filePickerSettings
+    }
+
+
     override fun show(
-        context: Context,
-        fragmentManager: FragmentManager,
+        context: Context?,
+        fragmentManager: FragmentManager?,
         containerId: Int,
-        callback: OnFilesChooseCallback
+        callback: OnFilesChooseCallback?
     ) {
         val args = convertSettings()
         FilePickerVM.parentFragmentManager = fragmentManager;
         FilePickerVM.containerId = containerId;
         FilePickerVM.filesChooseCallback = callback
         if (args == null) {
-            callback.onError(
+            callback?.onError(
                 FilePickerVM.filePickerSettings?.cb,
                 FilePickerVM.filePickerSettings?.id,
                 "Wrong accept types"
@@ -78,12 +81,15 @@ class FilePicker : IFilePicker {
             FilePickerMainFragment().apply {
                 arguments = args
                 try {
-                    val t = fragmentManager.beginTransaction()
-                        .add(containerId, this, "FilePicker")
-                    t.addToBackStack(null)
-                    t.commitAllowingStateLoss()
+                    fragmentManager?.let {
+                        val t = it.beginTransaction()
+                            .add(containerId, this, "FilePicker")
+                        t.addToBackStack(null)
+                        t.commitAllowingStateLoss()
+                    }
+
                 } catch (e: IllegalStateException) {
-                    callback.onError(
+                    callback?.onError(
                         FilePickerVM.filePickerSettings?.cb,
                         FilePickerVM.filePickerSettings?.id,
                         e.message.orEmpty()

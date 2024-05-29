@@ -16,7 +16,7 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import com.inappstory.sdk.stories.utils.Sizes
+import com.inappstory.utils.iasfilepicker.utils.Sizes
 
 class CameraButton @JvmOverloads constructor(
     context: Context,

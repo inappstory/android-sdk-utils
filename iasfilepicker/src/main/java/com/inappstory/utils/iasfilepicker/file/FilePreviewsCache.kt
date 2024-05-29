@@ -15,8 +15,6 @@ import android.provider.MediaStore
 import android.util.Size
 import android.widget.ImageView
 import androidx.exifinterface.media.ExifInterface
-import com.inappstory.sdk.stories.utils.Sizes
-import com.inappstory.utils.iasfilepicker.FilePickerVM
 import com.inappstory.utils.iasfilepicker.utils.BitmapCache
 import com.inappstory.utils.iasfilepicker.utils.QueuedTask
 import kotlinx.coroutines.CoroutineScope
@@ -272,7 +270,7 @@ class FilePreviewsCache {
             val o = BitmapFactory.Options()
             o.inJustDecodeBounds = true
             BitmapFactory.decodeStream(FileInputStream(f), null, o)
-            val REQUIRED_SIZE = Sizes.dpToPxExt(200)
+            val REQUIRED_SIZE = 600
             var width_tmp = o.outWidth
             var height_tmp = o.outHeight
             var scale = 1

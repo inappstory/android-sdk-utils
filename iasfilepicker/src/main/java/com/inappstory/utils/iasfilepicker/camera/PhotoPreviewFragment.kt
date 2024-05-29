@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.inappstory.sdk.stories.utils.Sizes
+import com.inappstory.utils.iasfilepicker.utils.Sizes
 import com.inappstory.utils.iasfilepicker.R
 
 class PhotoPreviewFragment : PreviewFragment() {
@@ -22,11 +22,12 @@ class PhotoPreviewFragment : PreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<ImageView>(R.id.photo_preview).also {
-            val x = Sizes.getScreenSize().x.coerceAtMost(
-                9 * Sizes.getScreenSize().y / 16
+            val scSize = Sizes.getScreenSize(it.context)
+            val x = scSize.x.coerceAtMost(
+                9 * scSize.y / 16
             )
-            val y = Sizes.getScreenSize().y.coerceAtMost(
-                16 * Sizes.getScreenSize().x / 9
+            val y = scSize.y.coerceAtMost(
+                16 * scSize.x / 9
             )
             it.layoutParams.width = x
             it.layoutParams.height = y

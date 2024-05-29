@@ -9,8 +9,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.inappstory.sdk.stories.utils.Sizes
 import com.inappstory.utils.iasfilepicker.R
+import com.inappstory.utils.iasfilepicker.utils.Sizes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

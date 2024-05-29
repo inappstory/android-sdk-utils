@@ -27,7 +27,7 @@ class FilePickerMainFragment : Fragment() {
 
     fun requestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<out String?>,
         grantResults: IntArray
     ) {
         val fragment = childFragmentManager.findFragmentByTag("FILE_CHOOSE")

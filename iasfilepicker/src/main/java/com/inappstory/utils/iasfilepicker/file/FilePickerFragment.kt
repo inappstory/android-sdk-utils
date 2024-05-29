@@ -175,7 +175,7 @@ internal class FilePickerFragment : BackPressedFragment() {
 
     fun requestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<out String?>,
         grantResults: IntArray
     ) {
         var allGranted = true;

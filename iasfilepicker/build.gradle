@@ -61,10 +61,7 @@ dependencies {
 
     implementation "androidx.exifinterface:exifinterface:$exif_version"
 
-
-    implementation("com.github.inappstory:android-sdk:$inappstory_version") {
-        transitive=true
-    }
+    implementation "com.github.inappstory:android-sdk-utilsconnector:$utils_connector_version"
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:2.6.8'
     testImplementation 'org.json:json:20180813'

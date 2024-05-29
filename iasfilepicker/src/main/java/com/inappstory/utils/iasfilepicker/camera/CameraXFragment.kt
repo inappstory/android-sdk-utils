@@ -20,7 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.inappstory.sdk.stories.utils.Sizes
+import com.inappstory.utils.iasfilepicker.utils.Sizes
 import com.inappstory.utils.iasfilepicker.R
 import kotlinx.coroutines.*
 import java.io.File
@@ -59,11 +59,13 @@ class CameraXFragment : Fragment(), ImageCapture.OnImageSavedCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         previewView = view.findViewById<PreviewView?>(R.id.previewView).apply {
-            val x = Sizes.getScreenSize().x.coerceAtMost(
-                9 * Sizes.getScreenSize().y / 16
+
+            val scSize = Sizes.getScreenSize(view.context)
+            val x = scSize.x.coerceAtMost(
+                9 * scSize.y / 16
             )
-            val y = Sizes.getScreenSize().y.coerceAtMost(
-                16 * Sizes.getScreenSize().x / 9
+            val y = scSize.y.coerceAtMost(
+                16 * scSize.x / 9
             )
             layoutParams.width = x
             layoutParams.height = y

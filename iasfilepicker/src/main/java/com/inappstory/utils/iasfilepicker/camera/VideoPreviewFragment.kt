@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.inappstory.sdk.stories.ui.video.VideoPlayer
-import com.inappstory.sdk.stories.utils.Sizes
 import com.inappstory.utils.iasfilepicker.R
+import com.inappstory.utils.iasfilepicker.utils.Sizes
+import com.inappstory.utils.iasfilepicker.utils.VideoPlayer
 
 class VideoPreviewFragment : PreviewFragment() {
     override fun onCreateView(
@@ -21,11 +21,12 @@ class VideoPreviewFragment : PreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<VideoPlayer>(R.id.video_preview).also {
-            val x = Sizes.getScreenSize().x.coerceAtMost(
-                9 * Sizes.getScreenSize().y / 16
+            val scrSizes = Sizes.getScreenSize(it.context)
+            val x = scrSizes.x.coerceAtMost(
+                9 * scrSizes.y / 16
             )
-            val y = Sizes.getScreenSize().y.coerceAtMost(
-                16 * Sizes.getScreenSize().x / 9
+            val y = scrSizes.y.coerceAtMost(
+                16 * scrSizes.x / 9
             )
             it.layoutParams.width = x
             it.layoutParams.height = y

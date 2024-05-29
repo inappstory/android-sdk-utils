@@ -1,7 +1,8 @@
 package com.inappstory.utils.iasfilepicker
 
 import androidx.fragment.app.FragmentManager
-import com.inappstory.sdk.modulesconnector.utils.filepicker.OnFilesChooseCallback
+import com.inappstory.iasutilsconnector.filepicker.OnFilesChooseCallback
+import com.inappstory.utils.iasfilepicker.file.FilePickerSettings
 
 object FilePickerVM {
     var filesChooseCallback: OnFilesChooseCallback? = null
@@ -32,7 +33,7 @@ object FilePickerVM {
         filesChooseCallback = null
     }
 
-    fun closeWithResult(filesWithTypes: Array<String>) {
+    fun closeWithResult(filesWithTypes: Array<String?>) {
         parentFragmentManager?.popBackStack()
         filesChooseCallback?.onChoose(
             filePickerSettings?.cb,
