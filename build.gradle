@@ -15,8 +15,8 @@ buildscript {
         gradle_plugin_version = "1.7.20"
 
 
-        inappstory_utils_output_version = "1.0.1"
-        inappstory_utils_output_build = 2
+        inappstory_utils_output_version = "1.0.2"
+        inappstory_utils_output_build = 3
     }
     repositories {
         google()
