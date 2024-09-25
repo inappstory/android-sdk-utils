@@ -3,6 +3,7 @@ package com.inappstory.utils.iasfilepicker
 import androidx.fragment.app.FragmentManager
 import com.inappstory.iasutilsconnector.filepicker.OnFilesChooseCallback
 import com.inappstory.utils.iasfilepicker.file.FilePickerSettings
+import java.lang.ref.WeakReference
 
 object FilePickerVM {
     var filesChooseCallback: OnFilesChooseCallback? = null
@@ -12,6 +13,7 @@ object FilePickerVM {
 
     fun close() {
         parentFragmentManager?.popBackStack()
+        parentFragmentManager = null
     }
 
     fun cancel() {
@@ -21,6 +23,7 @@ object FilePickerVM {
             filePickerSettings?.id
         )
         filesChooseCallback = null
+        parentFragmentManager = null
     }
 
     fun closeWithError(error: String) {
@@ -31,6 +34,7 @@ object FilePickerVM {
             error
         )
         filesChooseCallback = null
+        parentFragmentManager = null
     }
 
     fun closeWithResult(filesWithTypes: Array<String?>) {
@@ -41,5 +45,6 @@ object FilePickerVM {
             filesWithTypes
         )
         filesChooseCallback = null
+        parentFragmentManager = null
     }
 }

@@ -12,6 +12,7 @@ import com.inappstory.utils.iasfilepicker.utils.BackPressedFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import java.util.ArrayList
 
 class FilePicker : IFilePicker {
@@ -67,6 +68,7 @@ class FilePicker : IFilePicker {
         val args = convertSettings()
         FilePickerVM.parentFragmentManager = fragmentManager;
         FilePickerVM.containerId = containerId;
+
         FilePickerVM.filesChooseCallback = callback
         if (args == null) {
             callback?.onError(
