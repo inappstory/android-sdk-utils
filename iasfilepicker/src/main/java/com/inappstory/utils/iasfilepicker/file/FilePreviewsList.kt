@@ -29,7 +29,7 @@ class FilePreviewsList @JvmOverloads constructor(
     }
 
     fun load(
-        hasFileAccess: Boolean,
+        filesAccess: FilesAccess,
         allowMultipleSelection: Boolean,
         mimeTypes: List<String>,
         clickCallback: FileClickCallback,
@@ -43,7 +43,7 @@ class FilePreviewsList @JvmOverloads constructor(
         val adapter = FilePreviewsAdapter(
             context = context,
             coroutineScope = lifecycleScope,
-            hasFileAccess = hasFileAccess,
+            filesAccess = filesAccess,
             allowMultipleSelection = allowMultipleSelection,
             mimeTypes = mimeTypes,
             clickCallback = clickCallback,

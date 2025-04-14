@@ -10,8 +10,11 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.inappstory.utils.iasfilepicker.FilePickerMainFragment
 import com.inappstory.utils.iasfilepicker.R
@@ -36,6 +39,9 @@ internal class FilePickerFragment : BackPressedFragment() {
 
     private lateinit var uploadButton: FloatingActionButton
     private lateinit var previews: FilePreviewsList
+    private lateinit var manageButton: AppCompatButton
+    private lateinit var manageHint: TextView
+    private lateinit var partialLayout: View
 
     var acceptTypes = arrayListOf<String>()
     val selectedFiles = arrayListOf<SelectedFile>()
@@ -59,12 +65,26 @@ internal class FilePickerFragment : BackPressedFragment() {
                 }
             }
             if (!allGranted) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Build.VERSION.SDK_INT >= 34) {
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        if (!loaded || previews.adapter?.itemCount == 0)
+                            loadPreviews(filesAccess = FilesAccess.PARTIAL)
+                    } else {
+                        this.requestPermissions(
+                            localPerms.toTypedArray(),
+                            STORAGE_PERMISSIONS_RESULT
+                        )
+                    }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     this.requestPermissions(localPerms.toTypedArray(), STORAGE_PERMISSIONS_RESULT)
                 }
             } else {
                 if (!loaded || previews.adapter?.itemCount == 0)
-                    loadPreviews(true)
+                    loadPreviews(filesAccess = FilesAccess.FULL)
             }
         }
     }
@@ -105,6 +125,9 @@ internal class FilePickerFragment : BackPressedFragment() {
         if (Build.VERSION.SDK_INT >= 33) {
             add("android.permission.READ_MEDIA_IMAGES")
             add("android.permission.READ_MEDIA_VIDEO")
+            if (Build.VERSION.SDK_INT >= 34) {
+                add("android.permission.READ_MEDIA_VISUAL_USER_SELECTED")
+            }
         } else {
             add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             add(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -115,6 +138,9 @@ internal class FilePickerFragment : BackPressedFragment() {
         super.onViewCreated(view, savedInstanceState)
         uploadButton = view.findViewById(R.id.upload)
         previews = view.findViewById(R.id.previews)
+        partialLayout = view.findViewById(R.id.partialAccessLayout)
+        manageButton = view.findViewById(R.id.manageAccess)
+        manageHint = view.findViewById(R.id.partialAccessHint)
         arguments?.apply {
             val messageNames = getStringArray("messageNames")
             val messageValues = getStringArray("messages")
@@ -135,6 +161,73 @@ internal class FilePickerFragment : BackPressedFragment() {
                 (parentFragment as FilePickerMainFragment).sendResult(convertFiles().toTypedArray())
             }
         }
+        manageHint.text = messages.getOrElse(
+            "android_gallery_permission_warning_label",
+            defaultValue = { manageHintText })
+        manageButton.text = messages.getOrElse(
+            "android_gallery_permission_warning_manage_button",
+            defaultValue = { manageButtonText })
+        manageButton.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                openManageBottomSheet(
+                    newChoiceText = messages.getOrElse(
+                        "android_gallery_permission_select_other_files_button",
+                        defaultValue = { newChoice }),
+                    settingsText = messages.getOrElse(
+                        "android_gallery_permission_open_settings_button",
+                        defaultValue = { openSettings })
+                )
+                /* openSettingsDialog(
+                     text = "Your app has only partial access to gallery",
+                     positiveText = messages.getOrElse(
+                         "dialog_button_settings",
+                         defaultValue = { videoDefault }),
+                     negativeText = messages.getOrElse(
+                         "dialog_button_not_now",
+                         defaultValue = { videoDefault }),
+                     neutralText = "New choice",
+                     neutralCallback = {
+                         requireActivity().requestPermissions(
+                             appPerms,
+                             STORAGE_PERMISSIONS_RESULT
+                         )
+                     },
+                 )*/
+
+            }
+        }
+    }
+
+    private fun openManageBottomSheet(newChoiceText: String?, settingsText: String?) {
+        if (dialogShown) return
+        activity?.let { activity ->
+            val dialog = BottomSheetDialog(activity)
+            val bottomSheetLayout = layoutInflater.inflate(R.layout.cs_bottom_sheet_dialog, null)
+            val newChoice = bottomSheetLayout.findViewById<TextView>(R.id.newChoice)
+            val settings = bottomSheetLayout.findViewById<TextView>(R.id.settings)
+            newChoiceText?.let { text -> newChoice.text = text }
+            settingsText?.let { text -> settings.text = text }
+            newChoice.setOnClickListener {
+                dialog.dismiss()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    activity.requestPermissions(
+                        appPerms,
+                        STORAGE_PERMISSIONS_RESULT
+                    )
+                }
+            }
+            settings.setOnClickListener {
+                dialog.dismiss()
+                openSettingsScreen()
+            }
+            dialog.setContentView(bottomSheetLayout)
+            dialog.setOnDismissListener {
+                dialogShown = false
+            }
+            dialog.show()
+            dialogShown = true
+        }
+
     }
 
     private fun convertFiles(): ArrayList<String> {
@@ -171,7 +264,10 @@ internal class FilePickerFragment : BackPressedFragment() {
         "You need storage access to load photos and videos. Tap Settings > Permissions and turn \'Files and media\' on"
     private val videoDefault =
         "You need camera and microphone access to make photos and videos. Tap Settings > Permissions and turn 'Camera' and 'Microphone' on"
-
+    private val openSettings = "Open settings"
+    private val newChoice = "Change the choice..."
+    private val manageButtonText = "Manage"
+    private val manageHintText = "You did not allow the app to access the entire gallery"
 
     fun requestPermissionsResult(
         requestCode: Int,
@@ -184,10 +280,19 @@ internal class FilePickerFragment : BackPressedFragment() {
         if (requestCode == STORAGE_PERMISSIONS_RESULT
             || requestCode == CAMERA_PERMISSIONS_RESULT
         ) {
+            var partialGranted = true;
             if (grantResults.isNotEmpty()) {
                 permissions.forEachIndexed { index, permission ->
-                    if (grantResults[index] != 0)
-                        allGranted = false;
+                    if (permission.orEmpty() == "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") {
+                        if (grantResults[index] != 0) {
+                            partialGranted = false;
+                        }
+                    } else {
+                        if (grantResults[index] != 0) {
+                            allGranted = false;
+                        }
+                    }
+
                 }
             } else {
                 return;
@@ -195,18 +300,31 @@ internal class FilePickerFragment : BackPressedFragment() {
             when (requestCode) {
                 STORAGE_PERMISSIONS_RESULT -> {
                     if (!allGranted)
-                        openSettingsDialog(
-                            text = messages.getOrElse(
-                                "dialog_storage_permission_warning",
-                                defaultValue = { storageDefault }),
-                            positiveText = positiveText,
-                            negativeText = negativeText,
-                        ) {
-                            loadPreviews(false)
+                        if (!partialGranted) {
+                            openSettingsDialog(
+                                text = messages.getOrElse(
+                                    "dialog_storage_permission_warning",
+                                    defaultValue = { storageDefault }),
+                                positiveText = positiveText,
+                                negativeText = negativeText,
+                                neutralText = null,
+                                neutralCallback = null,
+                            ) {
+                                loadPreviews(
+                                    filesAccess =
+                                    FilesAccess.NONE
+                                )
+                            }
+                        } else {
+                            loadPreviews(
+                                filesAccess =
+                                FilesAccess.PARTIAL
+                            )
                         }
                     else
-                        loadPreviews(true)
+                        loadPreviews(filesAccess = FilesAccess.FULL)
                 }
+
                 CAMERA_PERMISSIONS_RESULT -> {
                     if (!allGranted)
                         openSettingsDialog(
@@ -215,6 +333,8 @@ internal class FilePickerFragment : BackPressedFragment() {
                                 defaultValue = { videoDefault }),
                             positiveText = positiveText,
                             negativeText = negativeText,
+                            neutralText = null,
+                            neutralCallback = null,
                         )
                     else
                         openCameraScreen()
@@ -223,9 +343,13 @@ internal class FilePickerFragment : BackPressedFragment() {
         }
     }
 
-    private fun loadPreviews(hasFileAccess: Boolean) {
-        loaded = hasFileAccess
-
+    private fun loadPreviews(filesAccess: FilesAccess) {
+        loaded = (filesAccess != FilesAccess.NONE)
+        if (filesAccess == FilesAccess.PARTIAL) {
+            partialLayout.visibility = View.VISIBLE
+        } else {
+            partialLayout.visibility = View.GONE
+        }
         val galleryFileLimitText =
             messages["warns_file_picker_files_limit"] ?: "You can select up to 10 files"
         val allowMultiple = arguments?.getBoolean("allowMultiple") ?: false
@@ -249,7 +373,7 @@ internal class FilePickerFragment : BackPressedFragment() {
             "fileLimitVideoDuration" to fileLimitVideoDuration
         )
         previews.load(
-            hasFileAccess = hasFileAccess,
+            filesAccess = filesAccess,
             allowMultipleSelection = allowMultiple,
             mimeTypes = acceptTypes,
             clickCallback = object : FileClickCallback {
@@ -290,11 +414,13 @@ internal class FilePickerFragment : BackPressedFragment() {
         text: String,
         positiveText: String? = null,
         negativeText: String? = null,
+        neutralText: String? = null,
+        neutralCallback: (() -> Unit)? = null,
         negativeCallback: () -> Unit = {},
     ) {
         if (dialogShown) return
         activity?.apply {
-            AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this)
                 .setMessage(text)
                 .setCancelable(true)
                 .setPositiveButton(positiveText ?: "Settings") { dialog, which ->
@@ -307,8 +433,14 @@ internal class FilePickerFragment : BackPressedFragment() {
                     dialogShown = false
                     negativeCallback.invoke()
                 }
-                .create()
-                .show()
+            if (neutralCallback != null) {
+                builder.setNeutralButton(neutralText ?: "New choice") { dialog, which ->
+                    dialog?.dismiss()
+                    dialogShown = false
+                    neutralCallback.invoke()
+                }
+            }
+            builder.create().show()
             dialogShown = true
         }
     }

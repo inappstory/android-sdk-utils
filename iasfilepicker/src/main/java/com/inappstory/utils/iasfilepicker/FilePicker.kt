@@ -53,7 +53,8 @@ class FilePicker : IFilePicker {
     override fun setPickerSettings(settings: String?) {
         val filePickerSettings: FilePickerSettings? =
             UtilModulesHolder.jsonParser.fromJson(
-                settings, FilePickerSettings::class.java
+                settings,
+                FilePickerSettings::class.java
             )
         FilePickerVM.filePickerSettings = filePickerSettings
     }

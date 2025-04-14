@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 internal class FilePreviewsAdapter(
     context: Context?,
     val coroutineScope: CoroutineScope?,
-    val hasFileAccess: Boolean,
+    val filesAccess: FilesAccess,
     val allowMultipleSelection: Boolean,
     mimeTypes: List<String>,
     val clickCallback: FileClickCallback,
@@ -65,7 +65,7 @@ internal class FilePreviewsAdapter(
     override fun onBindViewHolder(holder: FilePreviewsHolder, position: Int) {
         val intPos = Integer.valueOf(position - 1)
         if (position != 0) {
-            if (hasFileAccess) {
+            if (filesAccess != FilesAccess.NONE) {
                 val file = previews[position - 1]
                 val path = file.name
                 val duration = file.duration
@@ -171,7 +171,7 @@ internal class FilePreviewsAdapter(
 
     override fun getItemViewType(position: Int): Int =
         if (position == 0) -1
-        else if (!hasFileAccess && position == 1) -2
+        else if (filesAccess == FilesAccess.NONE && position == 1) -2
         else position
 
     @SuppressLint("DefaultLocale")
@@ -188,10 +188,10 @@ internal class FilePreviewsAdapter(
 
     override fun getItemId(position: Int): Long = if (position == 0) -1 else position.toLong()
 
-    override fun getItemCount(): Int = (if (hasFileAccess) previews.size else 1) + 1
+    override fun getItemCount(): Int = (if (filesAccess != FilesAccess.NONE) previews.size else 1) + 1
 
     init {
-        if (hasFileAccess) {
+        if (filesAccess != FilesAccess.NONE) {
             previews.addAll(
                 picker.getImagesPath(
                     context!!,

@@ -5,7 +5,7 @@ import com.inappstory.iasutilsconnector.filepicker.OnFilesChooseCallback
 import com.inappstory.utils.iasfilepicker.file.FilePickerSettings
 import java.lang.ref.WeakReference
 
-object FilePickerVM {
+internal object FilePickerVM {
     var filesChooseCallback: OnFilesChooseCallback? = null
     var parentFragmentManager: FragmentManager? = null
     var containerId: Int? = null
