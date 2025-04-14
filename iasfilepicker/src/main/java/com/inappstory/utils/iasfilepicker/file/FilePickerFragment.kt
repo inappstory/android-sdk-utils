@@ -42,6 +42,7 @@ internal class FilePickerFragment : BackPressedFragment() {
     private lateinit var manageButton: AppCompatButton
     private lateinit var manageHint: TextView
     private lateinit var partialLayout: View
+    private lateinit var accessDialog: AccessBottomSheetDialog
 
     var acceptTypes = arrayListOf<String>()
     val selectedFiles = arrayListOf<SelectedFile>()
@@ -141,6 +142,7 @@ internal class FilePickerFragment : BackPressedFragment() {
         partialLayout = view.findViewById(R.id.partialAccessLayout)
         manageButton = view.findViewById(R.id.manageAccess)
         manageHint = view.findViewById(R.id.partialAccessHint)
+        accessDialog = view.findViewById(R.id.accessDialog)
         arguments?.apply {
             val messageNames = getStringArray("messageNames")
             val messageValues = getStringArray("messages")
@@ -167,16 +169,31 @@ internal class FilePickerFragment : BackPressedFragment() {
         manageButton.text = messages.getOrElse(
             "android_gallery_permission_warning_manage_button",
             defaultValue = { manageButtonText })
+        accessDialog.initButtons(
+            newChoiceText = messages.getOrElse(
+                "android_gallery_permission_select_other_files_button",
+                defaultValue = { newChoice }),
+            settingsText = messages.getOrElse(
+                "android_gallery_permission_open_settings_button",
+                defaultValue = { openSettings }),
+            cancelText = messages.getOrElse(
+                "dialog_button_not_now",
+                defaultValue = { cancelText }),
+            newChoiceClick = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    activity?.requestPermissions(
+                        appPerms,
+                        STORAGE_PERMISSIONS_RESULT
+                    )
+                }
+            },
+            settingsClick = {
+                openSettingsScreen()
+            }
+        )
         manageButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                openManageBottomSheet(
-                    newChoiceText = messages.getOrElse(
-                        "android_gallery_permission_select_other_files_button",
-                        defaultValue = { newChoice }),
-                    settingsText = messages.getOrElse(
-                        "android_gallery_permission_open_settings_button",
-                        defaultValue = { openSettings })
-                )
+                accessDialog.show()
                 /* openSettingsDialog(
                      text = "Your app has only partial access to gallery",
                      positiveText = messages.getOrElse(
@@ -267,6 +284,7 @@ internal class FilePickerFragment : BackPressedFragment() {
     private val openSettings = "Open settings"
     private val newChoice = "Change the choice..."
     private val manageButtonText = "Manage"
+    private val cancelText = "Cancel"
     private val manageHintText = "You did not allow the app to access the entire gallery"
 
     fun requestPermissionsResult(
