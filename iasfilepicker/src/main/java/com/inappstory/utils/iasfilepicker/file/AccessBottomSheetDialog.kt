@@ -18,6 +18,13 @@ class AccessBottomSheetDialog : FrameLayout {
     private lateinit var bottomSheetBackground: View
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
+    fun handleBackPress(): Boolean {
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED || bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN)
+            return false
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        return true
+    }
+
     private fun inflateLayout(context: Context) {
         inflate(context, R.layout.cs_bottom_sheet_dialog, this);
         cancelButton = findViewById(R.id.cancel)

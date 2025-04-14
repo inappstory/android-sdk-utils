@@ -25,7 +25,10 @@ import java.util.UUID
 
 
 internal class FilePickerFragment : BackPressedFragment() {
-
+    override fun onBackPressed(): Boolean {
+        if (accessDialog.handleBackPress()) return true
+        return super.onBackPressed()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -213,38 +216,6 @@ internal class FilePickerFragment : BackPressedFragment() {
 
             }
         }
-    }
-
-    private fun openManageBottomSheet(newChoiceText: String?, settingsText: String?) {
-        if (dialogShown) return
-        activity?.let { activity ->
-            val dialog = BottomSheetDialog(activity)
-            val bottomSheetLayout = layoutInflater.inflate(R.layout.cs_bottom_sheet_dialog, null)
-            val newChoice = bottomSheetLayout.findViewById<TextView>(R.id.newChoice)
-            val settings = bottomSheetLayout.findViewById<TextView>(R.id.settings)
-            newChoiceText?.let { text -> newChoice.text = text }
-            settingsText?.let { text -> settings.text = text }
-            newChoice.setOnClickListener {
-                dialog.dismiss()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    activity.requestPermissions(
-                        appPerms,
-                        STORAGE_PERMISSIONS_RESULT
-                    )
-                }
-            }
-            settings.setOnClickListener {
-                dialog.dismiss()
-                openSettingsScreen()
-            }
-            dialog.setContentView(bottomSheetLayout)
-            dialog.setOnDismissListener {
-                dialogShown = false
-            }
-            dialog.show()
-            dialogShown = true
-        }
-
     }
 
     private fun convertFiles(): ArrayList<String> {
