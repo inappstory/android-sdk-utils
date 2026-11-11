@@ -2,11 +2,8 @@ package com.inappstory.utils.iasfilepicker.file
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
 
 class FilePreviewsList @JvmOverloads constructor(
     context: Context,
@@ -21,37 +18,19 @@ class FilePreviewsList @JvmOverloads constructor(
             false
         )
     }
-    var lifecycleScope: CoroutineScope? = null
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        lifecycleScope = ViewTreeLifecycleOwner.get(this)?.lifecycleScope
     }
 
     fun load(
-        filesAccess: FilesAccess,
-        allowMultipleSelection: Boolean,
-        mimeTypes: List<String>,
-        clickCallback: FileClickCallback,
         cameraCallback: OpenCameraClickCallback,
-        noAccessCallback: NoAccessCallback,
-        galleryFileMaxCount: Int,
-        translations: Map<String, String>,
-        pickerFilter: PickerFilter
+        filePickerClickCallback: OpenFilePickerClickCallback
     ) {
 
         val adapter = FilePreviewsAdapter(
-            context = context,
-            coroutineScope = lifecycleScope,
-            filesAccess = filesAccess,
-            allowMultipleSelection = allowMultipleSelection,
-            mimeTypes = mimeTypes,
-            clickCallback = clickCallback,
             cameraCallback = cameraCallback,
-            noAccessCallback = noAccessCallback,
-            galleryFileMaxCount = galleryFileMaxCount,
-            pickerFilter = pickerFilter,
-            translations = translations
+            filePickerClickCallback = filePickerClickCallback
         )
         adapter.setHasStableIds(true)
         setAdapter(adapter)
